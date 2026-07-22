@@ -273,6 +273,9 @@
       <a href="https://cpimonitoring.github.io" target="_blank">CPI Pulse</a> ·
       Questions? <a href="mailto:integrationmonitorcim@gmail.com">integrationmonitorcim@gmail.com</a>
     </div>
+    <div style="text-align:center; font-size:10px; color:#94a3b8; margin-top:12px; line-height:1.6;">
+      Your transaction ID is submitted securely to our license server for manual review. No other personal data is collected.
+    </div>
   </div>
 
   <script>
@@ -298,9 +301,10 @@
       submitMsg.className = "msg";
       submitMsg.textContent = "";
 
-      if (!txn) {
+      const submitErr = validateTxn(txn);
+      if (submitErr) {
         submitMsg.className = "msg error";
-        submitMsg.textContent = "Please enter the transaction ID.";
+        submitMsg.textContent = submitErr;
         return;
       }
 
@@ -337,9 +341,10 @@
       checkMsg.className = "msg";
       checkMsg.innerHTML = "";
 
-      if (!txn) {
+      const checkErr = validateTxn(txn);
+      if (checkErr) {
         checkMsg.className = "msg error";
-        checkMsg.textContent = "Please enter your transaction ID.";
+        checkMsg.textContent = checkErr;
         return;
       }
 
@@ -386,6 +391,14 @@
     // Enter key on both inputs
     txnInput.addEventListener("keydown",      (e) => e.key === "Enter" && submitBtn.click());
     checkTxnInput.addEventListener("keydown", (e) => e.key === "Enter" && checkBtn.click());
+
+    function validateTxn(txn) {
+      if (!txn) return "Please enter the transaction ID.";
+      if (txn.length < 8) return "Transaction ID too short — minimum 8 characters.";
+      if (txn.length > 35) return "Transaction ID too long — maximum 35 characters (NPCI limit).";
+      if (!/^[a-zA-Z0-9]+$/.test(txn)) return "Transaction ID should only contain letters and numbers.";
+      return null; // valid
+    }
 
     function esc(s) {
       return String(s || "")
