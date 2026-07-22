@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CPI Pulse — UPI Payment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #0a1628;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(10, 22, 40, 0.12);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0a1628;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 20px 0;
+    }
+
+    /* QR section */
+    .qr-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .qr-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 10px;
+      border: 2px solid #0a6ed1;
+      margin-bottom: 12px;
+    }
+
+    .amount-badge {
+      display: inline-block;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0a1628;
+      margin-bottom: 6px;
+    }
+
+    .upi-id {
+      font-size: 13px;
+      color: #0a6ed1;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    .apps-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    /* Form */
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: monospace;
+      color: #0a1628;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #0a6ed1;
+      box-shadow: 0 0 0 3px rgba(10,110,209,0.1);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 10px;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: default; }
+
+    .btn-green { background: #16a34a; color: #fff; }
+    .btn-blue  { background: #0a6ed1; color: #fff; }
+
+    .btn:not(:disabled):hover { opacity: 0.88; }
+
+    .msg {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      min-height: 18px;
+    }
+
+    .msg.success { color: #16a34a; }
+    .msg.error   { color: #dc2626; }
+    .msg.pending { color: #d97706; }
+
+    .key-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 15px;
+      color: #15803d;
+      word-break: break-all;
+      font-weight: 700;
+    }
+
+    .order-box {
+      margin-top: 6px;
+      padding: 8px 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #1d4ed8;
+    }
+
+    .warning-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .check-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .check-row input { flex: 1; }
+
+    .btn-sm {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #0a6ed1;
+      color: #fff;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+
+    .btn-sm:disabled { opacity: 0.6; cursor: default; }
+    .btn-sm:not(:disabled):hover { opacity: 0.88; }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .footer a { color: #0a6ed1; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="logo">📊</div>
+      <div class="title">CPI Pulse — UPI Payment</div>
+      <div class="subtitle">Integration Suite Monitor · One-Time License</div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="qr-section">
+      <img
+        class="qr-img"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAGaAQAAAAAefbjOAAADk0lEQVR4nO2cXYrjSgxGj6YK8liBLCBLcXYwSxp6SbMDeylZwAX7saGM5kEq2zMPF2YCTtqRoYN/6oAKq1WfVEpE+etj+Pb3DAQUUEBfFJrEjxuzMIiI3CaRNmIWmDJtUN7bvID2h5KqqiqQlG5MfuZ+cFKRa4VOVVXH/c0L6AmQ/+9PHii0B6B8ivalQndfnz7DvIB2hPIf18qUKpQKTBcVEBiu9UnmBfR0SG7ls0mG66doX1RV7/l/of3MC2gnSFUrQFL9OCelG8E0QzfOwnAGKKq+nHyJOQX079BsIQEA+WHxIKncppN//BjBkhA5729eQLtC6OYY18smHCz1KNtR2r/4nAJ6BELV0k0svwSSak9S7UvFcw174EPCIw4NeVCwt293PCjQjeAfNiRixDtAi4AEKNU0ZqtHqG7iho7gwePF5xTQIxDtTbczkxBLXuE6ot3TMTziDSDXESLnpCKSlxhRAWZxt4ia5VtAHhS6MW2CQlObqamHEdeYFjxefE4BPQI1HaFtL6u328klxGbjy1aSWDUODtG2PdtZNzYBaXmF+UY1pwmPOD60qVDZi183x5fsc6Mxox5xeMgqVGtRwnJOe6C1qYzFaUJHHB5aPMLXBcswus360cb1LGrzxecU0CNQtsaY4QZrD64yXapCzVBGhPKfnelw29e8gHaHPNewo9Rt2VqX4lTXElQiRhwe8lWjb6ml17OXp32pbOoRoSwPD7VcY/zdGZYdjm1u2jKR8IiDQ5OIyNWLDa3s4N243iIDyI3FLV5/TgE9BCWlu2essfLjnBSmk/ou6JSbhJgWB/kCcwroX6GmLIt3QHiMKE1KWsdlu+d648XnFNAjUAZSZfgOQgEgqcBJGa6fokwgkFS6e0Yg15efU0CPQNZ2L91dUJgzTJcKZcSWCUjecjmcU4Xpsqt5Ae0ObbJPu+6Wptu1tW49uuiYOTr0ey9267fd7GFYPaL1TEQ94vDQtmbZad2GjKU/olUromb5DpArSwDxL3oilmG0zQ0EEso0iw7fx13NC2h3yJXlKiAt9TiPuG/0gP2IBEs68uJzCugR6M/vhvtmJ7kqzHn9sIfdz8g+3wqaRXtm8WL1dLLqJcO5bYZ9nJ9pXkA7QJseqrWrzvWkepFy23sZ2efRocwiEmC6LF0zs9D1SYUyZ4ZrzeLj0q7mBbQ7lKGszVOuLnVpqFL/2zRY7WpeQAEF9GToF4/29cYMRN9MAAAAAElFTkSuQmCC"
+        alt="UPI QR Code"
+      />
+      <div class="amount-badge">₹399 — One-Time License</div>
+      <div class="upi-id">UPI ID: cimmonitoring@ibl</div>
+      <div class="apps-hint">Scan with GPay, PhonePe, Paytm or any UPI app</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Submit -->
+    <div class="section-label">Step 1 — Submit transaction</div>
+    <input type="text" id="txnInput" placeholder="UPI transaction ID / reference number" autocomplete="off" />
+    <div class="hint">After paying, enter the transaction reference number shown in your payment app.</div>
+    <button class="btn btn-green" id="submitBtn">Submit for Review</button>
+    <div class="msg" id="submitMsg"></div>
+
+    <div class="divider"></div>
+
+    <!-- Check status -->
+    <div class="section-label">Step 2 — Check if your key is ready</div>
+    <div class="hint" style="margin-bottom:8px;">Already submitted? Enter your transaction ID to check approval status.</div>
+    <div class="check-row">
+      <input type="text" id="checkTxnInput" placeholder="Your transaction ID" autocomplete="off" />
+      <button class="btn-sm" id="checkBtn">Check Status</button>
+    </div>
+    <div class="msg" id="checkMsg"></div>
+
+    <div class="footer">
+      <a href="https://cpimonitoring.github.io" target="_blank">CPI Pulse</a> ·
+      Questions? <a href="mailto:integrationmonitorcim@gmail.com">integrationmonitorcim@gmail.com</a>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://cim-monitoring-license-api.integrationmonitorcim.workers.dev";
+
+    async function apiPost(path, body) {
+      const res = await fetch(API + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    const submitBtn = document.getElementById("submitBtn");
+    const txnInput  = document.getElementById("txnInput");
+    const submitMsg = document.getElementById("submitMsg");
+
+    submitBtn.addEventListener("click", async () => {
+      const txn = txnInput.value.trim();
+      submitMsg.className = "msg";
+      submitMsg.textContent = "";
+
+      if (!txn) {
+        submitMsg.className = "msg error";
+        submitMsg.textContent = "Please enter the transaction ID.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
+      try {
+        const data = await apiPost("/upi-request", { transactionId: txn });
+        if (data?.success) {
+          submitMsg.className = "msg success";
+          submitMsg.textContent = "✅ " + (data.message || "Submitted! We'll review and approve shortly.");
+          txnInput.value = "";
+          document.getElementById("checkTxnInput").value = txn;
+        } else {
+          submitMsg.className = "msg error";
+          submitMsg.textContent = "❌ " + (data?.message || "Could not submit. Please try again.");
+        }
+      } catch (err) {
+        submitMsg.className = "msg error";
+        submitMsg.textContent = "❌ Network error — please try again.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit for Review";
+      }
+    });
+
+    // ── Check status ──────────────────────────────────────────────────────────
+    const checkBtn     = document.getElementById("checkBtn");
+    const checkTxnInput = document.getElementById("checkTxnInput");
+    const checkMsg     = document.getElementById("checkMsg");
+
+    checkBtn.addEventListener("click", async () => {
+      const txn = checkTxnInput.value.trim();
+      checkMsg.className = "msg";
+      checkMsg.innerHTML = "";
+
+      if (!txn) {
+        checkMsg.className = "msg error";
+        checkMsg.textContent = "Please enter your transaction ID.";
+        return;
+      }
+
+      checkBtn.disabled = true;
+      checkBtn.textContent = "Checking…";
+
+      try {
+        const data = await apiPost("/upi-check-status", { transactionId: txn });
+        const status = data?.status;
+
+        if (status === "approved") {
+          checkMsg.className = "msg success";
+          const orderHtml = data.orderId
+            ? `<div class="order-box">Order ID: ${esc(data.orderId)}</div>`
+            : "";
+          checkMsg.innerHTML = `
+            <div style="font-weight:700; margin-bottom:4px;">✅ Approved! Your license key:</div>
+            <div class="key-box">${esc(data.licenseKey || "")}</div>
+            ${orderHtml}
+            <div class="warning-box">
+              ⚠️ Save your key and Order ID somewhere safe — you'll need the key if you reinstall the extension,
+              and the Order ID lets you recover it later if you lose it.
+            </div>
+          `;
+        } else if (status === "pending") {
+          checkMsg.className = "msg pending";
+          checkMsg.textContent = "⏳ Still under review. Please check back in a little while.";
+        } else if (status === "rejected") {
+          checkMsg.className = "msg error";
+          checkMsg.textContent = "❌ " + (data?.message || "This payment could not be verified.");
+        } else {
+          checkMsg.className = "msg error";
+          checkMsg.textContent = "No request found for that transaction ID.";
+        }
+      } catch (err) {
+        checkMsg.className = "msg error";
+        checkMsg.textContent = "❌ Network error — please try again.";
+      } finally {
+        checkBtn.disabled = false;
+        checkBtn.textContent = "Check Status";
+      }
+    });
+
+    // Enter key on both inputs
+    txnInput.addEventListener("keydown",      (e) => e.key === "Enter" && submitBtn.click());
+    checkTxnInput.addEventListener("keydown", (e) => e.key === "Enter" && checkBtn.click());
+
+    function esc(s) {
+      return String(s || "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+  </script>
+</body>
+</html>
