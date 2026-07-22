@@ -1,771 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="referrer" content="strict-origin-when-cross-origin" />
-<title>CPI Pulse – Integration Suite Monitor</title>
-<meta name="description" content="Chrome and Edge extension for SAP Integration Suite monitoring. Cloud and Edge messages, artifacts, JMS queues, certificates, dependency signals, and tenant comparison — all from one panel on your SAP page." />
-<link rel="icon" href="data:," />
-<style>
-  :root{
-    --bg:#070d1a;
-    --bg-soft:#0b1730;
-    --card:#0e1c38;
-    --line:rgba(255,255,255,0.08);
-    --line-strong:rgba(255,255,255,0.16);
-    --text:#e8edf7;
-    --text-dim:#9fb0cc;
-    --text-faint:#869ac0;
-    --blue:#2f8fe0;
-    --blue-bright:#5fb4ff;
-    --green:#34d399;
-    --amber:#f5b945;
-    --red:#f0625f;
-  }
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{margin:0; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans', -apple-system, Segoe UI, sans-serif; -webkit-font-smoothing:antialiased;}
-  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;} }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CPI Pulse — UPI Payment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .mono{font-family:'IBM Plex Mono', 'SF Mono', Consolas, monospace;}
-  h1,h2,h3{margin:0; font-weight:600; letter-spacing:-0.01em;}
-  a{color:inherit;}
-  .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--blue-bright);}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #0a1628;
+    }
 
-  .wrap{max-width:1080px; margin:0 auto; padding:0 28px;}
-  section{padding:88px 0;}
-  @media (max-width:720px){ section{padding:56px 0;} .wrap{padding:0 20px;} }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(10, 22, 40, 0.12);
+    }
 
-  .nav{position:sticky; top:0; z-index:50; background:rgba(7,13,26,0.86); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
-  .nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:14px 28px;}
-  .nav-brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px;}
-  .nav-logo{width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg,#2f8fe0,#1c4f8a); display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700;}
-  .nav-links{display:flex; gap:28px; font-size:14px; color:var(--text-dim);}
-  .nav-links a{text-decoration:none; transition:color .15s;}
-  .nav-links a:hover{color:var(--text);}
-  .nav-cta{font-size:13px; padding:8px 16px; border-radius:7px; background:var(--blue); color:#fff; text-decoration:none; font-weight:600; transition:background .15s;}
-  .nav-cta:hover{background:var(--blue-bright);}
-  @media (max-width:720px){ .nav-links{display:none;} }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
 
-  .hero{padding:96px 0 64px; position:relative; overflow:hidden;}
-  .hero::before{content:""; position:absolute; top:-200px; right:-160px; width:600px; height:600px; background:radial-gradient(circle, rgba(47,143,224,0.16), transparent 70%); pointer-events:none;}
-  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:center; position:relative;}
-  @media (max-width:880px){ .hero-grid{grid-template-columns:1fr; gap:40px;} }
-  .hero h1{font-size:44px; line-height:1.12; margin:18px 0 18px;}
-  .hero h1 .accent{color:var(--blue-bright);}
-  .hero p.lead{font-size:17px; color:var(--text-dim); line-height:1.6; max-width:520px;}
-  @media (max-width:560px){ .hero h1{font-size:32px;} }
-  .hero-ctas{display:flex; gap:12px; margin-top:30px; flex-wrap:wrap;}
-  .btn{display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; border:1px solid transparent; transition:transform .12s, background .15s, border-color .15s; cursor:pointer;}
-  .btn:active{transform:translateY(1px);}
-  .btn-primary{background:var(--blue); color:#fff;}
-  .btn-primary:hover{background:var(--blue-bright);}
-  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong);}
-  .btn-ghost:hover{border-color:var(--blue-bright); color:var(--blue-bright);}
-  .trial-note{margin-top:18px; font-size:13px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
-  .trial-note b{color:var(--green);}
+    .logo {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
 
-  .button-stage{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; position:relative; min-height:340px;}
-  .stage-label{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:18px;}
-  .stage-window{background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; height:240px; position:relative; overflow:hidden;}
-  .stage-window::before{content:"sap-integration-suite.cfapps.eu10.hana.ondemand.com"; position:absolute; top:0; left:0; right:0; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-faint); background:rgba(255,255,255,0.03); padding:7px 12px; border-bottom:1px solid var(--line);}
-  .cim-pill{position:absolute; bottom:18px; right:18px; display:flex; align-items:center; gap:8px; background:#0b1730; border:1px solid var(--line-strong); border-radius:30px; padding:9px 16px 9px 12px; font-family:'IBM Plex Mono',monospace; font-size:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4);}
-  .cim-dot{width:11px; height:11px; border-radius:50%; animation:cimPulse 6s infinite; box-shadow:0 0 0 0 rgba(52,211,153,0.5);}
-  @keyframes cimPulse{
-    0%,18%{ background:var(--green); box-shadow:0 0 0 0 rgba(52,211,153,0.45);}
-    4%{box-shadow:0 0 0 6px rgba(52,211,153,0);}
-    25%,43%{ background:var(--amber); box-shadow:0 0 0 0 rgba(245,185,69,0.45);}
-    29%{box-shadow:0 0 0 6px rgba(245,185,69,0);}
-    50%,68%{ background:var(--red); box-shadow:0 0 0 0 rgba(240,98,95,0.45);}
-    54%{box-shadow:0 0 0 6px rgba(240,98,95,0);}
-    75%,93%{ background:var(--blue-bright); box-shadow:0 0 0 0 rgba(95,180,255,0.45);}
-    79%{box-shadow:0 0 0 6px rgba(95,180,255,0);}
-    100%{ background:var(--green);}
-  }
-  .stage-rows{position:absolute; top:32px; left:14px; right:14px; display:flex; flex-direction:column; gap:7px;}
-  .stage-row{height:9px; border-radius:3px; background:rgba(255,255,255,0.05);}
-  .stage-row.w1{width:78%;} .stage-row.w2{width:54%;} .stage-row.w3{width:88%;} .stage-row.w4{width:42%;}
-  .stage-caption{margin-top:16px; font-size:12.5px; color:var(--text-faint); line-height:1.55;}
-  .stage-caption b{color:var(--text-dim);}
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0a1628;
+      margin-bottom: 4px;
+    }
 
-  .section-head{max-width:640px; margin-bottom:44px;}
-  .section-head h2{font-size:30px; margin-top:12px;}
-  .section-head p{color:var(--text-dim); font-size:15.5px; line-height:1.6; margin-top:10px;}
+    .subtitle {
+      font-size: 13px;
+      color: #64748b;
+    }
 
-  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
-  @media (max-width:880px){ .grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:560px){ .grid{grid-template-columns:1fr;} }
-  .feat{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; transition:border-color .15s, transform .15s; cursor:pointer; text-align:left; width:100%; font-family:inherit; color:inherit;}
-  .feat:hover{border-color:var(--blue-bright); transform:translateY(-2px);}
-  .feat.is-open{border-color:var(--blue-bright); background:linear-gradient(160deg, rgba(47,143,224,0.10), var(--card) 65%);}
-  .feat-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
-  .feat-icon{width:32px; height:32px; border-radius:8px; flex-shrink:0; background:rgba(47,143,224,0.14); border:1px solid rgba(47,143,224,0.3); display:flex; align-items:center; justify-content:center; font-size:14px;}
-  .feat-chevron{color:var(--text-faint); font-size:13px; transition:transform .2s; margin-top:6px;}
-  .feat.is-open .feat-chevron{transform:rotate(180deg); color:var(--blue-bright);}
-  .feat h3{font-size:14.5px; margin:13px 0 6px;}
-  .feat p.tag{font-size:13.5px; color:var(--text-dim); line-height:1.55; margin:0;}
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 20px 0;
+    }
 
-  .feat-detail{grid-column:1 / -1; display:none; background:var(--bg-soft); border:1px solid var(--blue-bright); border-radius:12px; padding:22px 24px; margin:-2px 0 4px;}
-  .feat-detail.is-visible{display:block;}
-  .feat-detail h4{font-size:15px; color:var(--blue-bright); margin-bottom:12px; font-family:'IBM Plex Mono',monospace;}
-  .feat-detail ul{margin:0; padding-left:20px; columns:2; column-gap:32px;}
-  @media (max-width:760px){ .feat-detail ul{columns:1;} }
-  .feat-detail li{font-size:14px; color:var(--text); opacity:0.92; line-height:1.6; margin-bottom:11px; break-inside:avoid;}
-  .feat-detail .close-row{margin-top:14px; text-align:right;}
-  .feat-detail .close-btn{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-faint); background:none; border:1px solid var(--line-strong); border-radius:6px; padding:5px 12px; cursor:pointer;}
-  .feat-detail .close-btn:hover{color:var(--text); border-color:var(--text-faint);}
+    /* QR section */
+    .qr-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-  .demo{background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
-  .demo-tabs{display:flex; border-bottom:1px solid var(--line); background:rgba(255,255,255,0.02);}
-  .demo-tab{flex:1; padding:13px 10px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-faint); border-right:1px solid var(--line);}
-  .demo-tab:last-child{border-right:none;}
-  .demo-tab.active{color:var(--blue-bright); background:rgba(47,143,224,0.08);}
-  .demo-body{padding:22px; display:grid; grid-template-columns:1fr 1fr; gap:18px;}
-  @media (max-width:680px){ .demo-body{grid-template-columns:1fr;} }
-  .demo-col h4{font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin-bottom:10px; font-family:'IBM Plex Mono',monospace;}
-  .demo-box{background:var(--bg-soft); border:1px solid var(--line); border-radius:8px; padding:14px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text); opacity:0.95; line-height:1.75; min-height:120px;}
-  .demo-box .muted{color:var(--text-faint); font-style:italic;}
-  .demo-row{display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line);}
-  .demo-row:last-child{border-bottom:none;}
-  .demo-status{font-size:11px; font-weight:600;}
-  .demo-status.pass{color:var(--green);}
-  .demo-footer{padding:14px 22px; border-top:1px solid var(--line); font-size:12px; color:var(--text-faint); background:rgba(255,255,255,0.015);}
+    .qr-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 10px;
+      border: 2px solid #0a6ed1;
+      margin-bottom: 12px;
+    }
 
-  .beyond-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
-  @media (max-width:760px){ .beyond-grid{grid-template-columns:1fr;} }
-  .beyond-item{
-    background:var(--card); border:1px solid var(--line); border-radius:10px;
-    padding:14px 16px 14px 18px; font-size:13.5px; line-height:1.55; color:var(--text-dim);
-    position:relative; transition:border-color .15s, transform .15s;
-  }
-  .beyond-item:hover{border-color:var(--line-strong); transform:translateY(-1px);}
-  .beyond-dot{
-    position:absolute; left:0; top:18px; width:4px; height:18px; border-radius:3px;
-    background:var(--bdot, var(--blue));
-  }
+    .amount-badge {
+      display: inline-block;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0a1628;
+      margin-bottom: 6px;
+    }
 
-  .price-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
-  @media (max-width:680px){ .price-grid{grid-template-columns:1fr;} }
-  .price-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:28px;}
-  .price-card.highlight{border-color:rgba(47,143,224,0.45); background:linear-gradient(160deg, rgba(47,143,224,0.08), var(--card) 60%);}
-  .price-tag{font-family:'IBM Plex Mono',monospace; font-size:34px; font-weight:700; margin:10px 0 4px;}
-  .price-sub{font-size:12.5px; color:var(--text-faint); margin-bottom:18px;}
-  .price-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
-  .price-list li{font-size:13.5px; color:var(--text-dim); display:flex; gap:9px; align-items:flex-start;}
-  .price-list li::before{content:"—"; color:var(--blue-bright); flex-shrink:0;}
+    .upi-id {
+      font-size: 13px;
+      color: #0a6ed1;
+      font-family: monospace;
+      font-weight: 600;
+    }
 
-  .steps{display:flex; flex-direction:column; gap:0;}
-  .step{display:grid; grid-template-columns:48px 1fr; gap:18px; padding:22px 0; border-bottom:1px solid var(--line);}
-  .step:last-child{border-bottom:none;}
-  .step-num{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--blue-bright); width:36px; height:36px; border-radius:8px; border:1px solid rgba(47,143,224,0.35); display:flex; align-items:center; justify-content:center; background:rgba(47,143,224,0.08);}
-  .step h4{font-size:15.5px; margin-bottom:5px;}
-  .step p{font-size:13.5px; color:var(--text-dim); line-height:1.55; margin:0;}
+    .apps-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
 
-  footer{border-top:1px solid var(--line); padding:40px 0;}
-  .foot-grid{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
-  .foot-links{display:flex; gap:22px; font-size:13px; color:var(--text-dim);}
-  .foot-links a{text-decoration:none;}
-  .foot-links a:hover{color:var(--blue-bright);}
-  .foot-copy{font-size:12px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
+    /* Form */
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
 
-  .pill{display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:4px 10px; border-radius:20px; border:1px solid var(--line-strong); color:var(--text-dim);}
-  .pill b{color:var(--text);}
+    input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: monospace;
+      color: #0a1628;
+      outline: none;
+      transition: border-color 0.15s;
+    }
 
-  .group-label{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-faint); margin:36px 0 14px; grid-column:1/-1;}
-  .group-label:first-of-type{margin-top:0;}
-</style>
+    input[type="text"]:focus {
+      border-color: #0a6ed1;
+      box-shadow: 0 0 0 3px rgba(10,110,209,0.1);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 10px;
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: default; }
+
+    .btn-green { background: #16a34a; color: #fff; }
+    .btn-blue  { background: #0a6ed1; color: #fff; }
+
+    .btn:not(:disabled):hover { opacity: 0.88; }
+
+    .msg {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      min-height: 18px;
+    }
+
+    .msg.success { color: #16a34a; }
+    .msg.error   { color: #dc2626; }
+    .msg.pending { color: #d97706; }
+
+    .key-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 15px;
+      color: #15803d;
+      word-break: break-all;
+      font-weight: 700;
+    }
+
+    .order-box {
+      margin-top: 6px;
+      padding: 8px 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #1d4ed8;
+    }
+
+    .warning-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .check-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .check-row input { flex: 1; }
+
+    .btn-sm {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #0a6ed1;
+      color: #fff;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+
+    .btn-sm:disabled { opacity: 0.6; cursor: default; }
+    .btn-sm:not(:disabled):hover { opacity: 0.88; }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .footer a { color: #0a6ed1; text-decoration: none; }
+  </style>
 </head>
 <body>
-
-<nav class="nav">
-  <div class="wrap">
-    <div class="nav-brand"><div class="nav-logo mono">CP</div><span>CPI Pulse</span></div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#test-cases">Test Cases</a>
-      <a href="#beyond-standard">Beyond Standard</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#install">Install</a>
+  <div class="card">
+    <div class="header">
+      <div class="logo">📊</div>
+      <div class="title">CPI Pulse — UPI Payment</div>
+      <div class="subtitle">Integration Suite Monitor · One-Time License</div>
     </div>
-    <a class="nav-cta" href="#install">Add to browser</a>
-  </div>
-</nav>
 
-<header class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="eyebrow">For SAP Integration Suite</span>
-      <h1>Your SAP Integration Suite tenant,<br/>watched from <span class="accent">one button.</span></h1>
-      <p class="lead">CPI Pulse is a Chrome and Edge extension that sits on your SAP Integration Suite page and gives you Cloud and Edge monitoring, artifacts, JMS queues, certificates, and tenant comparison — without opening a second tool.</p>
-      <div class="hero-ctas">
-        <a class="btn btn-primary" href="#install">Add to Chrome — free trial</a>
-        <a class="btn btn-ghost" href="#features">See what it does</a>
-      </div>
-      <div class="trial-note">$ trial --days 30 &nbsp;→&nbsp; <b>full access, no card required</b></div>
+    <!-- QR Code -->
+    <div class="qr-section">
+      <img
+        class="qr-img"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAGaAQAAAAAefbjOAAADk0lEQVR4nO2cXYrjSgxGj6YK8liBLCBLcXYwSxp6SbMDeylZwAX7saGM5kEq2zMPF2YCTtqRoYN/6oAKq1WfVEpE+etj+Pb3DAQUUEBfFJrEjxuzMIiI3CaRNmIWmDJtUN7bvID2h5KqqiqQlG5MfuZ+cFKRa4VOVVXH/c0L6AmQ/+9PHii0B6B8ivalQndfnz7DvIB2hPIf18qUKpQKTBcVEBiu9UnmBfR0SG7ls0mG66doX1RV7/l/of3MC2gnSFUrQFL9OCelG8E0QzfOwnAGKKq+nHyJOQX079BsIQEA+WHxIKncppN//BjBkhA5729eQLtC6OYY18smHCz1KNtR2r/4nAJ6BELV0k0svwSSak9S7UvFcw174EPCIw4NeVCwt293PCjQjeAfNiRixDtAi4AEKNU0ZqtHqG7iho7gwePF5xTQIxDtTbczkxBLXuE6ot3TMTziDSDXESLnpCKSlxhRAWZxt4ia5VtAHhS6MW2CQlObqamHEdeYFjxefE4BPQI1HaFtL6u328klxGbjy1aSWDUODtG2PdtZNzYBaXmF+UY1pwmPOD60qVDZi183x5fsc6Mxox5xeMgqVGtRwnJOe6C1qYzFaUJHHB5aPMLXBcswus360cb1LGrzxecU0CNQtsaY4QZrD64yXapCzVBGhPKfnelw29e8gHaHPNewo9Rt2VqX4lTXElQiRhwe8lWjb6ml17OXp32pbOoRoSwPD7VcY/zdGZYdjm1u2jKR8IiDQ5OIyNWLDa3s4N243iIDyI3FLV5/TgE9BCWlu2essfLjnBSmk/ou6JSbhJgWB/kCcwroX6GmLIt3QHiMKE1KWsdlu+d648XnFNAjUAZSZfgOQgEgqcBJGa6fokwgkFS6e0Yg15efU0CPQNZ2L91dUJgzTJcKZcSWCUjecjmcU4Xpsqt5Ae0ObbJPu+6Wptu1tW49uuiYOTr0ey9267fd7GFYPaL1TEQ94vDQtmbZad2GjKU/olUromb5DpArSwDxL3oilmG0zQ0EEso0iw7fx13NC2h3yJXlKiAt9TiPuG/0gP2IBEs68uJzCugR6M/vhvtmJ7kqzHn9sIfdz8g+3wqaRXtm8WL1dLLqJcO5bYZ9nJ9pXkA7QJseqrWrzvWkepFy23sZ2efRocwiEmC6LF0zs9D1SYUyZ4ZrzeLj0q7mBbQ7lKGszVOuLnVpqFL/2zRY7WpeQAEF9GToF4/29cYMRN9MAAAAAElFTkSuQmCC"
+        alt="UPI QR Code"
+      />
+      <div class="amount-badge">₹399 — One-Time License</div>
+      <div class="upi-id">UPI ID: cimmonitoring@ibl</div>
+      <div class="apps-hint">Scan with GPay, PhonePe, Paytm or any UPI app</div>
     </div>
-    <div class="button-stage">
-      <div class="stage-label">// live on every SAP Integration Suite page</div>
-      <div class="stage-window">
-        <div class="stage-rows">
-          <div class="stage-row w1"></div>
-          <div class="stage-row w2"></div>
-          <div class="stage-row w3"></div>
-          <div class="stage-row w4"></div>
-        </div>
-        <div class="cim-pill"><span class="cim-dot"></span><span>CPI Pulse</span></div>
-      </div>
-      <div class="stage-caption"><b>The button changes colour on its own.</b> Green, amber, red or blue — based on your last hour of message traffic. No click needed to know if something's wrong. Drag it anywhere; it remembers.</div>
+
+    <div class="divider"></div>
+
+    <!-- Submit -->
+    <div class="section-label">Step 1 — Submit transaction</div>
+    <input type="text" id="txnInput" placeholder="UPI transaction ID / reference number" autocomplete="off" />
+    <div class="hint">After paying, enter the transaction reference number shown in your payment app.</div>
+    <button class="btn btn-green" id="submitBtn">Submit for Review</button>
+    <div class="msg" id="submitMsg"></div>
+
+    <div class="divider"></div>
+
+    <!-- Check status -->
+    <div class="section-label">Step 2 — Check if your key is ready</div>
+    <div class="hint" style="margin-bottom:8px;">Already submitted? Enter your transaction ID to check approval status.</div>
+    <div class="check-row">
+      <input type="text" id="checkTxnInput" placeholder="Your transaction ID" autocomplete="off" />
+      <button class="btn-sm" id="checkBtn">Check Status</button>
     </div>
-  </div>
-</header>
+    <div class="msg" id="checkMsg"></div>
 
-<section style="background:var(--bg); padding:48px 0 0;">
-  <div class="wrap" style="max-width:1100px;">
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
-
-      <div>
-        <div style="position:relative; width:100%; padding-top:56.25%; border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:0 20px 50px -28px rgba(0,0,0,0.6);">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/vS1adnCDbZc"
-            title="How to Install and Integration Suite Page Features"
-            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-          ></iframe>
-        </div>
-        <div style="text-align:center; margin-top:10px; font-size:14px; opacity:0.75;">How to Install &amp; Integration Suite Page Features</div>
-      </div>
-
-      <div>
-        <div style="position:relative; width:100%; padding-top:56.25%; border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:0 20px 50px -28px rgba(0,0,0,0.6);">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/RZAgOpjOwwk"
-            title="Test Sync and Async Interfaces and Match Output Payload"
-            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-          ></iframe>
-        </div>
-        <div style="text-align:center; margin-top:10px; font-size:14px; opacity:0.75;">Test Sync and Async Interfaces and Match Output Payload</div>
-      </div>
-
-      <div>
-        <div style="position:relative; width:100%; padding-top:56.25%; border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:0 20px 50px -28px rgba(0,0,0,0.6);">
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/r6rOuyZI06M"
-            title="Full Features"
-            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-          ></iframe>
-        </div>
-        <div style="text-align:center; margin-top:10px; font-size:14px; opacity:0.75;">Full Features</div>
-      </div>
-
+    <div class="footer">
+      <a href="https://cpimonitoring.github.io" target="_blank">CPI Pulse</a> ·
+      Questions? <a href="mailto:integrationmonitorcim@gmail.com">integrationmonitorcim@gmail.com</a>
     </div>
   </div>
-</section>
 
-<section id="beyond-standard">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">✨ What SAP doesn't give you</span>
-      <h2>Beyond standard <span class="hl">SAP Integration Suite</span>.</h2>
-      <p>Capabilities CPI Pulse adds on top of SAP Cloud Integration — none of these exist in SAP's own native screens.</p>
-    </div>
-    <div class="beyond-grid">
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#5fb4ff;"></span>Multi-select iFlow filtering with live status counts, clickable sender/receiver, and server-side Custom Status search — across both Cloud and Edge Monitoring.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#34d399;"></span>Bulk deploy, bulk redeploy, bulk undeploy, bulk restart, and bulk trace activation — act on multiple selected artifacts in one go instead of one at a time, across Integration Flows, Value Mappings, Message Mappings, and Script Collections.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f5b945;"></span>Saved filter views in monitoring — save a combination of range, status, iFlow, sender and receiver as a named view and restore it instantly.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#a78bfa;"></span>Custom coloured tags on iFlows — label and group artifacts your own way, independent of SAP packages.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#22d3ee;"></span>Per-queue JMS thresholds — set individual warning and critical alert levels for each queue, not just one tenant-wide setting.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f0625f;"></span>Consolidated Alerts — failed messages, certificate expiry, queue thresholds and error artifacts in one place, with one click back to where you were.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#5fb4ff;"></span>Draggable health-status button on the SAP page itself — changes colour live based on recent message health, no need to open the panel.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#34d399;"></span>Queue size and overdue-message counts shown together in one table, instead of checking each queue individually.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f5b945;"></span>Certificate expiry shown as days remaining, colour-coded by urgency.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#a78bfa;"></span>Idle iFlow detection across 1 hour, 24 hours, 7 days, or 30 days — scan depth adapts automatically to your tenant's traffic volume.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#22d3ee;"></span>All packages and their artifacts in one browsable, searchable page — instead of opening each package individually.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f0625f;"></span>Undeploy history — a running record of what was undeployed and when, kept automatically.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#5fb4ff;"></span>Message Journey — trace a single message end-to-end by Correlation ID, Message ID, or Custom Status from one screen.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#34d399;"></span>Built-in test cases with full payload comparison for both Sync and Async interfaces, showing exactly what passed, failed, or differed.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f5b945;"></span>One Dashboard combining message health, certificates, queues, artifacts and locks — a single screen instead of checking each area separately.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#a78bfa;"></span>Live deployment status marker shown directly next to each artifact's name on SAP's own design page — no need to switch screens.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#22d3ee;"></span>A Packages button added straight into SAP's design page header — browse every package and artifact with deployment status without leaving the page.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f0625f;"></span>A dedicated Packages page inside CPI Pulse itself — search, filter by type/status/package, export, and save views, without opening SAP's design page.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#34d399;"></span>Custom Header search and filtering — view all custom headers for a message in Message Journey, and filter monitoring by header Name/Value combined with Sender, Receiver, Custom Status and iFlow.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#f5b945;"></span>Bulk Activate and Deactivate for JMS queues — start or stop multiple queues in one action, something SAP's own JMS Queue Monitor doesn't offer at all.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#5fb4ff;"></span>Where Used for JMS queues — select any queue and instantly see every artifact that references it.</div>
-      <div class="beyond-item"><span class="beyond-dot" style="--bdot:#34d399;"></span>The extension remembers which page and tab you were last on — Packages environment, Artifact Overview sub-tab — and restores it after a reload, instead of always reopening on Dashboard.</div>
-    </div>
-  </div>
-</section>
+  <script>
+    const API = "https://cim-monitoring-license-api.integrationmonitorcim.workers.dev";
 
-<section id="features">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Everything in one panel</span>
-      <h2>One extension, every tenant resource.</h2>
-      <p>Click any card below for the full feature breakdown — exactly what's in the extension, no more, no less.</p>
-    </div>
-    <div class="grid" id="featureGrid"></div>
-  </div>
-</section>
+    async function apiPost(path, body) {
+      const res = await fetch(API + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }
 
-<section id="test-cases" style="background:var(--bg-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Built-in test automation</span>
-      <h2>Three ways to test an iFlow, none of them Postman.</h2>
-      <p>One shared, encrypted login for every test. Pick the interface check each test case needs — the form adjusts itself.</p>
-    </div>
-    <div class="demo">
-      <div class="demo-tabs">
-        <div class="demo-tab active">Sync</div>
-        <div class="demo-tab">Async</div>
-        <div class="demo-tab">Match Payload Async</div>
-      </div>
-      <div class="demo-body">
-        <div class="demo-col">
-          <h4>Checks performed</h4>
-          <div class="demo-box">
-            <div class="demo-row"><span>HTTP status</span><span class="demo-status pass">✓ checked</span></div>
-            <div class="demo-row"><span>iFlow processing (MPL)</span><span class="demo-status pass">✓ checked</span></div>
-            <div class="demo-row"><span>Expected payload</span><span class="demo-status pass">✓ checked</span></div>
-          </div>
-        </div>
-        <div class="demo-col">
-          <h4>Result, one click on "Run Selected"</h4>
-          <div class="demo-box">
-            ORDER_SYNC_TEST<br/>
-            <span class="muted">running…</span><br/><br/>
-            <span style="color:var(--green)">✓ 200 OK</span> · <span style="color:var(--green)">✓ COMPLETED</span> · <span style="color:var(--green)">✓ payload matched</span>
-          </div>
-        </div>
-      </div>
-      <div class="demo-footer">Sync runs the full check. Switch to Async and the Expected Payload box disappears instantly — only HTTP and MPL status matter. Switch to Match Payload Async and it's a single GET, compared straight against the response body — no MPL involved. If a payload doesn't match, CPI Pulse shows exactly what's missing, extra, or different — not just pass/fail. No endpoint handy? A ready-made utility iFlow ships with the page for exactly this — download it, deploy it, point the test at it. Note: the utility iFlow only reads Data Store PAYLOAD, Entry ID match — your own process needs to write the result there first.</div>
-    </div>
-  </div>
-</section>
+    // ── Submit ────────────────────────────────────────────────────────────────
+    const submitBtn = document.getElementById("submitBtn");
+    const txnInput  = document.getElementById("txnInput");
+    const submitMsg = document.getElementById("submitMsg");
 
-<section id="pricing">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Simple pricing</span>
-      <h2>One price. Own it forever.</h2>
-      <p>Try everything free for 30 days. If it earns a place on your SAP page, unlock it once — no subscription, no renewals.</p>
-    </div>
-    <div class="price-grid">
-      <div class="price-card">
-        <div class="stage-label" style="margin-bottom:6px;">// free trial</div>
-        <div class="price-tag">Free</div>
-        <div class="price-sub">30 days, full access, no card required</div>
-        <ul class="price-list">
-          <li>Every feature unlocked from first install — nothing gated during the trial.</li>
-          <li>No credit card, no account, no sign-up screen.</li>
-          <li>Trial badge in the sidebar counts down the days remaining.</li>
-        </ul>
-        <div style="margin-top:22px;">
-          <a class="btn btn-ghost" href="#install" style="width:100%; justify-content:center;">Add to Chrome</a>
-        </div>
-      </div>
-      <div class="price-card highlight">
-        <div class="stage-label" style="margin-bottom:6px;">// lifetime license</div>
-        <div class="price-tag">€3.99</div>
-        <div class="price-sub">One-time payment — not a subscription</div>
-        <div style="margin:14px 0; padding:10px 14px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.45); border-radius:10px; text-align:center;">
-          🎉 Use code <strong style="letter-spacing:0.5px;">FIRST50</strong> at checkout for <strong>20% off</strong>
-        </div>
-        <ul class="price-list">
-          <li>Pay by card (worldwide, €3.99 via Lemon Squeezy) or UPI (India, ₹399) — both handled directly inside the extension. Indian customers can use either option; UPI avoids the currency-conversion fees a card payment would otherwise incur.</li>
-          <li>One-time purchase, yours permanently — no renewals, no recurring charge.</li>
-          <li>Free updates and new features included for as long as you use CPI Pulse.</li>
-        </ul>
-        <div style="margin-top:22px;">
-          <a class="btn btn-primary" href="#install" style="width:100%; justify-content:center;">Install to get started</a>
-        </div>
-        <div class="price-sub" style="margin:12px 0 0; text-align:center;">Payment happens inside the extension — About → License Status, after install.</div>
-      </div>
-    </div>
-  </div>
-</section>
+    submitBtn.addEventListener("click", async () => {
+      const txn = txnInput.value.trim();
+      submitMsg.className = "msg";
+      submitMsg.textContent = "";
 
-<section id="install">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Setup</span>
-      <h2>From install to first health check.</h2>
-    </div>
-    <div class="steps">
-      <div class="step"><div class="step-num mono">01</div><div><h4>Add the extension</h4><p>Install from the Chrome Web Store — also works in Microsoft Edge (Chromium), see below. No account, no sign-up screen.</p></div></div>
-      <div class="step"><div class="step-num mono">02</div><div><h4>Open any SAP Integration Suite page</h4><p>A small CPI Pulse button appears at the bottom-right. It's already reading your last hour of messages.</p></div></div>
-      <div class="step"><div class="step-num mono">03</div><div><h4>Pick a tenant volume profile</h4><p>A one-time setup screen tunes page sizes and lookback windows to your tenant's traffic. Takes ten seconds.</p></div></div>
-      <div class="step"><div class="step-num mono">04</div><div><h4>Click the button, anytime</h4><p>Dashboard, monitoring, artifacts, queues, certificates — all there. Drag the button anywhere; it remembers.</p></div></div>
-    </div>
-    <div style="margin-top:36px; display:flex; gap:12px; flex-wrap:wrap;">
-      <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/lalnibcpeignbmdgcfmgjffdakljccja" target="_blank">Add to Chrome</a>
-    </div>
-    <div style="margin-top:14px; font-size:14px; opacity:0.75; max-width:640px; line-height:1.6;">
-      <b>Using Microsoft Edge?</b> A dedicated Edge Add-ons listing is coming soon — until then, the Chrome link above works directly in Edge too, since Edge is Chromium-based. Go to <code style="background:rgba(127,127,127,0.15); padding:2px 6px; border-radius:4px; font-size:13px;">edge://extensions</code>, turn on <b>"Allow extensions from other stores,"</b> then click Add to Chrome above from within Edge.
-    </div>
-  </div>
-</section>
+      const submitErr = validateTxn(txn);
+      if (submitErr) {
+        submitMsg.className = "msg error";
+        submitMsg.textContent = submitErr;
+        return;
+      }
 
-<footer>
-  <div class="wrap foot-grid">
-    <div class="foot-copy">© 2026 CPI Pulse – Integration Suite Monitor. All rights reserved.</div>
-    <div class="foot-links">
-      <a href="mailto:integrationmonitorcim@gmail.com">integrationmonitorcim@gmail.com</a>
-      <a href="#features">Features</a>
-      <a href="#install">Install</a>
-    </div>
-  </div>
-</footer>
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
 
-<script>
-const FEATURES = [
-  { group: "Monitoring", icon: "📊", title: "Dashboard", tag: "Live health snapshot of messages, certificates, queues, artifacts and locks.", points: [
-    "Live health snapshot combining message stats, certificates, JMS queues, artifacts and locked items in one view.",
-    "Row 1 — Message snapshot cards: Completed (1h), Failed (1h), Escalated (1h), Success Rate (1h). Each card is clickable — navigates to Cloud Monitoring filtered by that status.",
-    "Row 2 — Infrastructure cards: Critical Certificates, Queues With Messages, Started Artifacts, Locked Artifacts. All clickable with back-to-dashboard navigation.",
-    "Detail cards: Health Status (colour-coded), Message Volume (1h/24h/7d), Certificates (critical/warning/healthy counts), JMS Queues (queues with messages, total queued, overdue messages count, largest queue).",
-    "Top Message Trends and Top 5 Slowest iFlows — from sampled messages, collapsible.",
-    "Overdue Messages in JMS card — counts messages past their OverdueAt timestamp, shown in red when > 0.",
-    "Cloud/Edge context: message stats (1h/24h/7d) load from edge API when in Edge context. Certificates, JMS, Artifacts, Locked items always show cloud data.",
-    "Manual Refresh (🔄): refreshes the page you are currently on — clears the cache for that page and reloads fresh data from the API.",
-    "Dashboard refresh is the broadest — also clears idle iFlows, dependency signals, certificates, and JMS caches since the dashboard shows health data from all sources.",
-    "Clicking status cards (Success, Failed, Escalated) navigates to Cloud or Edge Monitoring filtered by that status for the last hour. A ← Back to Dashboard button clears the dashboard-applied filters on return.",
-    "Other pages refresh only their own data: Cloud Monitoring reloads messages, JMS reloads queues, Certificates reloads certs, etc.",
-    "Last Refresh indicator: green (fresh), amber (1 min), red (2+ mins)."
-  ]},
-  { group: "Monitoring", icon: "📈", title: "Cloud Monitoring", tag: "Multi-filter message monitoring with snapshot cards and saved views.", points: [
-    "View Integration Suite messages with status snapshots, pagination, and multi-filter support.",
-    "Status snapshot cards: Completed, Failed, Escalated, Processing, Retry, Cancelled — clickable to filter messages by that status. All counts update when iFlow filter changes.",
-    "Time range filter: Last Hour, Last 24h, 7 Days, 15 Days, 30 Days — profile-aware.",
-    "iFlow filter: custom multi-select dropdown — select one or more iFlows using checkboxes. Button shows count e.g. '3 iFlows selected'. Clear All link to reset.",
-    "Sender search: type a sender name and press Enter to filter. Press Escape or click ✕ to clear.",
-    "Receiver search: same behaviour as Sender search.",
-    "Sender and Receiver columns in the message table are clickable — instantly filters to all messages from/to that system.",
-    "Custom Status search: type any custom status value and press Enter to filter — searched server-side across the full selected date range, not just the currently loaded page, positioned after Receiver in the filter bar.",
-    "Custom Status values in the table are still clickable — navigates to Message Journey filtered by that custom status.",
-    "Custom Status is included in Saved Views.",
-    "Custom Header filter (low/medium volume tenants only): filter by a custom header Name + Header Value together — combines with Sender, Receiver, Custom Status and iFlow filters. Included in Saved Views.",
-    "Top Failed iFlows: shown independently below the message table — from the latest 2500 failed messages for the selected range.",
-    "Saved Views: save any combination of range, status, iFlow(s), sender, receiver, and page size as a named view.",
-    "Export CSV (current page), Export Excel (.xlsx), Export All CSV (all pages server-side).",
-    "Recent Messages table includes a Log End column — date and time each message finished processing, on two lines for compact readability."
-  ]},
-  { group: "Monitoring", icon: "🌐", title: "Edge Monitoring", tag: "Same filters and saved views, for Edge Integration Cell tenants.", points: [
-    "Full feature parity with Cloud Monitoring for Edge Integration Cell tenants.",
-    "Configure the Edge OData Virtual URL in the settings panel at the top of the page — format: https://<your-edge-host>/local — stored AES-encrypted.",
-    "Same multi-select iFlow dropdown (from edge runtime API), sender/receiver search, status snapshot cards, saved views.",
-    "Sender and Receiver columns in the message table.",
-    "Friendly error messages for: wrong URL, CORS blocked, authentication failed, timeout, 404 endpoint not found.",
-    "Context switch: select ☁️ Cloud or 🌐 Edge in the header. Switches clear all message caches.",
-    "Cloud-only pages (Artifacts, JMS, Certificates, Idle iFlows, Dependency, Version Compare) are blocked with a clear message in Edge context. Nav items appear dimmed.",
-    "Recent Messages table includes a Log End column — same format as Cloud Monitoring. Column widths optimised: Log End 75px, Application Message ID 130px, Correlation ID single line with ellipsis.",
-    "Custom Status search filter — same as Cloud Monitoring, searched server-side across the full date range. Included in Saved Views."
-  ]},
-  { group: "Monitoring", icon: "🧭", title: "Message Journey", tag: "Trace any message by Correlation ID, Message ID or Custom Status.", points: [
-    "Trace messages by Correlation ID, Message ID, Application Message ID, or Custom Status.",
-    "Detail panel shows: iFlow, Package, Status, Duration, Log Level, Sender, Receiver, Message ID, Correlation ID, Application Message ID, Custom Status.",
-    "Show Custom Headers button on the Message Details panel — fetches and displays all custom header Name/Value pairs for the selected message on demand.",
-    "Error Details button on any FAILED message — fetches and shows the exact underlying failure reason (e.g. a duplicate data store entry, mapping error, or connectivity failure), without digging through SAP's own logs.",
-    "Message ID and Correlation ID are clickable links — opens SAP Integration Suite Monitoring in a new tab, automatically filtered to that identifier.",
-    "Standard mode: server-side OData exact match by Correlation ID or Message ID.",
-    "Advanced mode: client-side filter by Application Message ID, Application Type, or Custom Status.",
-    "Custom Status mode: server-side OData filter — fetches all matching records across pages, grouped by iFlow."
-  ]},
+      try {
+        const data = await apiPost("/upi-request", { transactionId: txn });
+        if (data?.success) {
+          submitMsg.className = "msg success";
+          submitMsg.textContent = "✅ " + (data.message || "Submitted! We'll review and approve shortly.");
+          txnInput.value = "";
+          document.getElementById("checkTxnInput").value = txn;
+        } else {
+          submitMsg.className = "msg error";
+          submitMsg.textContent = "❌ " + (data?.message || "Could not submit. Please try again.");
+        }
+      } catch (err) {
+        submitMsg.className = "msg error";
+        submitMsg.textContent = "❌ Network error — please try again.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit for Review";
+      }
+    });
 
-  { group: "Artifacts", icon: "🧩", title: "Artifact Overview — Artifacts Tab", tag: "Deployed artifacts, sorted, tagged, with bulk operations.", points: [
-    "Shows all deployed runtime artifacts sorted by type (Integration Flow → Message Mapping → Script Collection → Value Mapping) then alphabetically by name within each type.",
-    "Type filter dropdown: filter by Integration Flow, Script Collection, Mapping, or Value Mapping.",
-    "Saved Views: save your current type and tag filter combination as a named view, restore it in one click — same pattern as Dependency Signals.",
-    "Pagination: Previous / Next with page number and total count shown.",
-    "Select All checkbox in the table header: selects/deselects all rows on the current page.",
-    "Custom Tags: add coloured tags to any artifact using the 🏷️ edit button. Tags stored in chrome.storage.local per tenant — survives browser cache clear. Filter bar appears above the table when tags exist.",
-    "Bulk operations on selected artifacts: Restart iFlow, Bulk Undeploy, Bulk iFlow Trace.",
-    "Click any artifact name to open its detail panel — runtime status, version, deployed by, deployed on, last execution, last run age, lock status.",
-    "View Error button appears next to the status of any FAILED artifact — fetches and shows the real deploy failure reason inline, without leaving the page.",
-    "Deployed On column shows when each artifact was last deployed, in d/M/yyyy, HH:mm:ss format.",
-    "Last Execution shows a clickable 'No execution — View messages' link — navigates to Cloud Monitoring filtered for that iFlow over 7 days.",
-    "Export CSV and Export Excel — exports Name, Type, Runtime Status for all filtered artifacts."
-  ]},
-  { group: "Artifacts", icon: "🔒", title: "Artifact Overview — Locked Artifacts Tab", tag: "See exactly what a lock is blocking, cross-referenced live.", points: [
-    "Shows all design-time locked artifacts — artifact name, type, package, locked by, locked at, and current runtime status.",
-    "Runtime status is cross-referenced live so you can immediately see if a locked artifact is blocking a deployment or is already deployed."
-  ]},
-  { group: "Artifacts", icon: "📋", title: "Artifact Overview — Undeploy History Tab", tag: "A built-in audit trail of every undeploy you've run.", points: [
-    "Shows up to 20 unique artifacts you undeployed — artifact name, type, deployed on, and undeployed at timestamps.",
-    "If the same artifact is undeployed multiple times, up to 5 timestamps are shown per row separated by line breaks (latest first).",
-    "Stored in chrome.storage.local per tenant — survives browser cache clear.",
-    "Clear History button removes all entries."
-  ]},
-  { group: "Artifacts", icon: "📦", title: "Packages", tag: "Every package and artifact, browsable and exportable, inside CPI Pulse.", points: [
-    "Browse every integration package and its artifacts from a dedicated page inside CPI Pulse — the same data shown on SAP's design page, without leaving the panel.",
-    "Type filter covers every SAP artifact type: Integration Flow, Integration Adapter, Message Mapping, Value Mapping, Script Collection, API, Function Library, Imported Archives, Data Type, Message Type, and Service Interface.",
-    "Status filter: All, Deployed, Not Deployed, or Error — combine with the type filter and free-text search.",
-    "Search box matches against package name, artifact name, or artifact type at once.",
-    "Deployed status badge with version number shown next to every artifact, refreshed on demand.",
-    "Bulk Deploy: select multiple Integration Flows, Value Mappings, Message Mappings, or Script Collections and deploy them straight from the design-time view, even if never deployed before — no need to open each one individually.",
-    "Bulk Redeploy: restart multiple already-deployed artifacts with their current design-time version in one action, using the same checkbox selection as Bulk Undeploy.",
-    "Bulk Undeploy: select multiple deployed artifacts and undeploy them together, right from the Current Tenant tab.",
-    "Select All Visible: combine with the type filter to select every artifact of one type at once — e.g. filter to Integration Flow, then select all, then deploy or undeploy them together.",
-    "Bulk Compliance Check: run SAP's own Design Guidelines validation across multiple selected Integration Flows at once — Pass/Fail badge with issue count per flow, expandable rule-by-rule breakdown (severity, mandatory flag, guideline and violation text), and a CSV export. Results persist across reloads.",
-    "Export CSV and Export Excel — respects whatever filters and search are currently active.",
-    "Saved Views: save any combination of type, status, and search as a named view, restore it in one click.",
-    "Manual refresh clears the package and runtime cache so you always see current deployment state.",
-    "Current Tenant tab (default): works immediately on whatever SAP tenant page you're on — no setup required.",
-    "DEV, TEST, and PROD tabs: once an environment is registered (see Compare Runtime), browse its packages and artifacts with the same filters, deploy status, and export — no need to switch browser tabs.",
-    "Compare All tab: pick any two of DEV, TEST, or PROD (each must be registered via Compare Runtime) and see every artifact side by side — status, version, and a clear flag for anything that differs or only exists in one environment.",
-    "Cloud only — blocked in Edge context, since package design data is a Cloud Integration concept."
-  ]},
-  { group: "Artifacts", icon: "⚙️", title: "Artifact Runtime", tag: "Status filter cards and a 7-day executed-iFlows view.", points: [
-    "Search box: type any iFlow name, package name, type or status to filter the list instantly.",
-    "Status filter cards: click Started (green) or Error (red) metric cards to filter the artifact list to that status. Click again to clear.",
-    "Metric cards: Started count, Error count, Deployed count, Executed iFlows (7d).",
-    "Executed iFlows (7d) card is a collapsible toggle — expands a table of all iFlows executed in the last 7 days (or 1 day for high/large profile).",
-    "Executed iFlows list shows: iFlow name, runtime status, last execution time, and a View Messages button.",
-    "View Messages navigates to Cloud Monitoring filtered for that iFlow over last 7 days, all statuses. A ← Back to Artifact Runtime button returns you.",
-    "Detail panel: click any artifact row for full details — runtime status, package, version, deployed by/on, last execution, last run age, lock status, locked by/at.",
-    "Export CSV and Export Excel."
-  ]},
-  { group: "Artifacts", icon: "💤", title: "Idle iFlows", tag: "Deployed and started, but processing nothing — found automatically.", points: [
-    "Finds iFlows with no recent message activity.",
-    "Scan depths: Last 1 Hour, 24h, Deep Scan 15d, Deep Scan 30d — restricted by tenant volume profile.",
-    "Cloud only — blocked in Edge context."
-  ]},
-  { group: "Artifacts", icon: "🕸", title: "Dependency Signals", tag: "Runtime artifacts, queues and certificates in one filterable view.", points: [
-    "Shows runtime artifacts, JMS queues, and certificates as dependency signals.",
-    "Supports dependency type filtering — filter to Runtime Artifact, JMS Queue, or Certificate.",
-    "Selected filter is remembered — persists when you navigate away and come back.",
-    "Saved Views: save any filter combination as a named view and restore it in one click. Up to 10 saved views stored per tenant.",
-    "Export CSV and Export Excel — exports the current filtered list.",
-    "Cloud only — blocked in Edge context."
-  ]},
+    // ── Check status ──────────────────────────────────────────────────────────
+    const checkBtn     = document.getElementById("checkBtn");
+    const checkTxnInput = document.getElementById("checkTxnInput");
+    const checkMsg     = document.getElementById("checkMsg");
 
-  { group: "Infrastructure", icon: "🛡️", title: "Manage Security", tag: "Certificates and Security Material, in one place.", points: [
-    "Two tabs: Certificates and Security Material.",
-    "Certificates tab: shows all certificates with expiry status — Critical (below 30 days), Warning, Healthy. Colour-coded counts at a glance. Search by name, type, owner, or last modified date. Copy button on each row.",
-    "Security Material tab: every deployed credential and security artifact — name, type, deploy state, deployed by, deployed on, and description. Search across all fields.",
-    "Export CSV and Export Excel on both tabs.",
-    "Cloud only — blocked in Edge context.",
-  ]},
-  { group: "Infrastructure", icon: "📨", title: "Store Overview", tag: "JMS Queues, Partner Directory, and Data Store — all in one place.", points: [
-    "Three tabs: JMS Queues, Partner Directory, and Data Store — always opens on JMS Queues first.",
-    "JMS Queues table: Name, Messages, Size, Status, Alert, Overdue columns — paginated 100 queues at a time for tenants with many queues.",
-    "Bulk Activate and Deactivate: select multiple queues and start or stop them together in one action — not available in SAP's own UI at all.",
-    "Where Used: select one or more queues and see every artifact that references them, without leaving the page.",
-    "Alert column: 🔴 Critical or 🟡 Warning based on configurable thresholds.",
-    "Overdue count is on-demand: click Check per queue, or Check All Overdue for the current page — nothing fetches automatically, so the tab opens fast even on tenants with thousands of messages.",
-    "⚙️ Thresholds: set warn/critical thresholds globally or per individual queue — stored in chrome.storage.local per tenant, survives browser cache clear.",
-    "View Messages per queue: loads 100 messages at a time with Previous/Next — even for queues with thousands of messages, only what's needed is rendered.",
-    "Data Store tab: every SAP data store as one row with entry count, an Overdue column, and a View Messages action — see Status (On Time/Overdue), write date, overdue date, and delete date per entry, with MPL ID linking straight into Message Journey.",
-    "Bulk delete for Data Stores: select multiple stores (or all of them) and delete them in one action, or drill into a single store and bulk-delete just its entries — filterable to Overdue or On Time only first. A typed confirmation is required before anything is deleted, since this can't be undone.",
-    "Total Stores and total Overdue entry counts shown at the top of the Data Store tab, updated on every refresh.",
-    "Search box: filters by name across whichever tab is active.",
-    "Cloud only — blocked in Edge context."
-  ]},
-  { group: "Infrastructure", icon: "🔔", title: "Alerts", tag: "Every tenant alert, consolidated in one place.", points: [
-    "Consolidates alerts from six sources: failed/escalated messages, certificate expiry, JMS queue thresholds and overdue counts, failed runtime artifacts (named individually), overdue Data Store entries, and locked artifacts.",
-    "JMS alerts show overdue message count when present, e.g. 'ORDER_QUEUE: 150 messages — ⚠️ 12 overdue'.",
-    "Failed artifacts are listed by name with a Go to Artifacts link — not just a count.",
-    "Data Store and Locked Artifacts show a total count with a direct link into that tab, instead of listing every entry.",
-    "Every alert row includes a Go-to link that jumps straight to the relevant page, and each of those pages has a working Back button to return to Alerts.",
-    "Alert button (🔔) in header: click to open Alerts — click again to return to the previous page you were on.",
-    "Cloud only — blocked in Edge context.",
-  ]},
-  { group: "Infrastructure", icon: "📦", title: "Packages Overview (Integration Suite Design Page)", tag: "Deployment status and version directly on SAP's own design page.", points: [
-    "Appears as a blue Packages button on the SAP Integration Suite design page (/shell/design) — next to the Design page title.",
-    "Shows all packages and their artifacts in a popup, sorted by type: Integration Flow, Message Mapping, Value Mapping, Script Collection, API.",
-    "Type filter dropdown narrows the list to one artifact type at a time, combinable with the search box.",
-    "Package filter dropdown narrows the popup to a single package, and a Status filter narrows to Deployed, Not Deployed, or Error — all three filters combine with each other and with search.",
-    "Each artifact row shows: checkbox, name, type badge (colour-coded), and deployed status badge.",
-    "Deployed status badge: Deployed (green), Error (red), Not Deployed (grey) — with deployed version number (e.g. v1.2) next to it.",
-    "Deploy button: deploy selected Integration Flows, Value Mappings, Message Mappings, or Script Collections directly from this popup, without opening the extension's own Packages page — checking an already-deployed artifact and clicking Deploy redeploys/restarts it.",
-    "Undeploy and Activate Trace buttons work the same way, for any artifact type.",
-    "Each package header shows total artifact count, ✅ deployed count, and ⬜ not deployed count.",
-    "Search box: filters by artifact name, type, or package name — matching text highlighted.",
-    "Select All checkbox for bulk operations.",
-    "🔄 Refresh, ⬇ Export CSV, ▶ Activate Trace (selected Integration Flows), ⏏ Undeploy (selected artifacts, with confirmation).",
-    "5-minute cache — subsequent opens are instant."
-  ]},
+    checkBtn.addEventListener("click", async () => {
+      const txn = checkTxnInput.value.trim();
+      checkMsg.className = "msg";
+      checkMsg.innerHTML = "";
 
-  { group: "Cross-tenant", icon: "🔁", title: "Compare Runtime", tag: "Compare Dev, Test and Prod side by side, live.", points: [
-    "Compares runtime artifacts between two Integration Suite environments — version mismatches, missing artifacts, and status differences side by side.",
-    "Supports three named environments: DEV, TEST, and PROD.",
-    "Register an environment: open the tab you're logged into that tenant on, open the extension, go to Compare Runtime, and click Register Current Tenant as DEV / TEST / PROD.",
-    "Open each tenant in its own browser tab (logged into DEV, TEST, PROD simultaneously across tabs), register each one, then run the comparison from any tab.",
-    "Each registered environment saves only its origin URL locally in your browser — no credentials are stored; each tab uses its own existing SAP session.",
-    "Compare From / Compare To dropdowns: select any two of DEV, TEST, PROD.",
-    "Results show: artifact name, version and status on each side. Highlights version mismatches and missing artifacts in red.",
-    "Export CSV and Export Excel — column headers use the actual registered environment names rather than generic Left/Right labels.",
-    "Clear buttons: remove individual or all registered environments.",
-    "Cloud only — blocked in Edge context."
-  ]},
-  { group: "Cross-tenant", icon: "🌍", title: "Global Search", tag: "One box across artifacts, queues and certificates.", points: [
-    "Searches across runtime artifacts, JMS queues, and certificates in a single search box.",
-    "Loads all data once when the page opens — subsequent searches filter in-memory instantly without additional API calls.",
-    "Results grouped by category: Artifacts, JMS Queues, Certificates.",
-    "Not a message search — for searching MPL message logs use Cloud Monitoring or Edge Monitoring.",
-    "Cloud only — blocked in Edge context."
-  ]},
-  { group: "Cross-tenant", icon: "💾", title: "Saved Views", tag: "Save a filter combination once, restore it in one click.", points: [
-    "Available in Cloud Monitoring and Edge Monitoring.",
-    "Save any combination of: time range, status, iFlow filter (multi-select), sender, receiver, and page size as a named view.",
-    "Restore with one click — all filters applied instantly including the iFlow multi-selection.",
-    "Views stored in chrome.storage.local per tenant — survives browser cache clear."
-  ]},
+      const checkErr = validateTxn(txn);
+      if (checkErr) {
+        checkMsg.className = "msg error";
+        checkMsg.textContent = checkErr;
+        return;
+      }
 
-  { group: "Test automation", icon: "🧪", title: "Test Cases", tag: "Sync, Async and Match Payload Async — one shared login for all.", points: [
-    "Two separate test types: Match Payload Async (max 1) and regular Test Cases (max 25) — both run against your SAP Integration Suite tenant directly from the browser.",
-    "Shared Username and Password: one login saved per tenant — used automatically by every test case. Auto-fills on page open. Password stored using AES-GCM encryption, never in plain text.",
-    "Match Payload Async: a single GET endpoint is called once and its raw HTTP response is compared directly against the Expected Payload box — no MPL or iFlow processing status is checked, only the response body.",
-    "If using the bundled utility iFlow, this test depends on a value already being written to Data Store PAYLOAD, Entry ID match, before you run it — typically by your own business iFlow producing that result first. The utility iFlow only reads (and deletes) the entry; it doesn't generate one itself.",
-    "Don't have an endpoint? Click Download Utility iFlow for a ready-made SAP Integration Suite iFlow package — import, deploy, point the test at it.",
-    "Regular Test Cases — Sync interface: full comparison — HTTP status, iFlow processing (MPL) status, and the response payload against Expected Payload.",
-    "Regular Test Cases — Async interface: checks only HTTP status and MPL status — the Expected Payload box is hidden and skipped, switching instantly when you change the dropdown.",
-    "Run Selected: tick any combination and run them in one click — each row shows a live ⏳ Running… status, then updates in place to ✅/❌.",
-    "Result panel shows: HTTP status vs expected, iFlow processing status, payload match result, and every related iFlow triggered for that message with its own status — Correlation ID and Message ID are clickable links into SAP Integration Suite Monitoring.",
-    "Failed payload comparisons show exactly what's wrong, not just pass/fail — missing fields, extra fields, and fields with a different value than expected, broken down field by field for JSON and line by line for XML/text.",
-    "Copy Selected, Download Selected (Excel), and Delete Selected — bulk actions for ticked test cases.",
-    "Test cases stored per tenant in chrome.storage.local — each tenant has its own independent set. Survives browser cache clear."
-  ]},
+      checkBtn.disabled = true;
+      checkBtn.textContent = "Checking…";
 
-  { group: "Utilities", icon: "🛠", title: "Tools", tag: "XML, JSON, Base64 and URL utilities, right on the tenant page.", points: [
-    "Utilities: XML formatting, JSON formatting, Base64 encode/decode, URL encode/decode."
-  ]},
-  { group: "Utilities", icon: "📊", title: "Export Features", tag: "Real .xlsx files, predictable filenames, no external libraries.", points: [
-    "Export CSV: exports the current page of results only.",
-    "Export Excel: real .xlsx file (Office Open XML format) — numbers exported as numeric cells, not text.",
-    "Export All CSV: fetches all pages server-side and exports as a single file — available in Cloud Monitoring and Edge Monitoring.",
-    "Export filenames include time range, page number, and record count, e.g. message-overview-24h-page1-200records.csv.",
-    "Available across: Cloud Monitoring, Edge Monitoring, Artifact Overview, Artifact Runtime, JMS Queues, Dependency Signals, Manage Security."
-  ]},
-  { group: "Utilities", icon: "🔄", title: "Auto Refresh & Manual Refresh", tag: "Per-page targeted refresh; Dashboard refresh is the broad one.", points: [
-    "Manual Refresh (🔄 button in header): refreshes the page you are currently on only — does NOT refresh all pages at once.",
-    "Dashboard manual refresh is the broadest — also clears idle iFlows, dependency signals, certificates and JMS caches.",
-    "Per-page refresh: Cloud Monitoring → messages | Edge Monitoring → edge messages | JMS → queues | Certificates → certs | Artifact Runtime → artifacts + execution data | Dependency → dependency signals.",
-    "Auto refresh runs silently in the background without reloading the full page — preserves scroll position, selected rows, and search text.",
-    "Auto refresh intervals: Dashboard every 60s, Cloud/Edge Monitoring every 30s, JMS Queues every 60s, Artifact Overview every 120s. All other pages are manual only.",
-    "Last Refresh indicator: green = fresh, amber = 1 min old, red = 2+ mins old.",
-    "Same-tenant, multiple tabs: if you open the same SAP tenant in two tabs, a one-time-per-session notice reminds you that changes in one tab (like an undeploy) won't appear in the other until you refresh."
-  ]},
-  { group: "Utilities", icon: "🎛️", title: "Header Buttons & CPI Pulse Button", tag: "Refresh, Alerts, Search, context switch, clock, and the button itself.", points: [
-    "🔄 Refresh — manual refresh for the current page, with colour-coded staleness signal.",
-    "🔔 Alerts — opens the Alerts page; click again to return to the page you were on.",
-    "🌍 Search — opens Global Search across artifacts, queues and certificates.",
-    "☁️ Cloud / 🌐 Edge context switcher — toggles context; cloud-only pages are blocked in Edge with a clear message.",
-    "⛶ Expand — toggles fullscreen mode for the extension popup.",
-    "Last Refresh label — 'just now', '30s ago', '1 min ago' etc., colour-coded.",
-    "🕐 Clock — live system clock in the header, updates every second.",
-    "CPI Pulse button (bottom-right of the SAP page): colour reflects last 1 hour message health — 🟢 zero failures, 🟡 failures below 10%, 🔴 10%+ failure rate, 🔵 no messages. Hover for exact counts.",
-    "CPI Pulse button updates every 60 seconds and is draggable — position is saved and restored after page reload."
-  ]},
+      try {
+        const data = await apiPost("/upi-check-status", { transactionId: txn });
+        const status = data?.status;
 
-  { group: "Account", icon: "🔑", title: "License & Trial", tag: "30 days free, then a one-time license unlocks everything.", points: [
-    "CPI Pulse includes a 30-day free trial — full access to all features from first install, no credit card required.",
-    "Trial badge: shown below 'Integration Suite Monitor' in the sidebar — ⏳ Trial: X days left (amber), ✅ Licensed (green), 🔒 Trial Expired (red).",
-    "After 30 days: only Dashboard, Tools, and About remain accessible until a valid license key is entered.",
-    "Pay by card (worldwide) or UPI (India) — both available directly from the License Status panel.",
-    "Activate: About → License Status → enter your license key (format KEY-XXXXXXXX) → Activate. Full access restored permanently.",
-    "Revoke: About → License Status → Remove License."
-  ]},
-  { group: "Account", icon: "⚙️", title: "Settings & Performance", tag: "Tenant volume profile, theme, encrypted Edge URL, storage guard.", points: [
-    "Tenant Volume Profile (low/medium/large/high): controls how many pages are fetched for sampling, charts, snapshot counts and lookups. Set once, every page adapts.",
-    "Theme toggle: dark and light mode — all custom dropdowns and inputs respect the selected theme.",
-    "Edge OData Virtual URL: configured per-tenant, stored AES-encrypted — never readable as plain text.",
-    "Storage guard: all localStorage writes check available space before saving — auto-evicts old design artifact cache entries past 4.5MB.",
-    "All critical data (test cases, saved views, tags, thresholds, undeploy history, dependency filter, design cache) stored in chrome.storage.local per tenant — never lost when clearing browser cache."
-  ]},
-  { group: "Account", icon: "🆕", title: "What's New", tag: "A running changelog, built right into the sidebar.", points: [
-    "A permanent tab in the sidebar — always accessible, even after a trial expires.",
-    "Lists every release with what changed, newest version first.",
-    "No popups, no dismissing — revisit anytime to see what's changed since you last checked.",
-    "This page (cpimonitoring.github.io) is the full feature reference; What's New inside CPI Pulse is just the changelog."
-  ]},
-  { group: "Releases", icon: "🚀", title: "v6.8.10 — July 19, 2026", tag: "Latest release: endpoints, log levels, cross-environment parameter compare, expanded search & signals.", points: [
-    "Dashboard — new \"Tenant Settings\" card (Transport, Malware Scanner, SAP PO System, Runtime Profile), persisted to storage, only refreshed on first load or an explicit Refresh button.",
-    "Alerts — Malware Scanner off flagged as a Warning alert.",
-    "Alerts — Dead Letter Queue detection (matches \"DLQ\" or \"dead letter\" in queue name), flagged Critical on any message regardless of normal thresholds.",
-    "Artifact Overview — \"Show Endpoint\" for Integration Flows, resolved via the correct SAP API.",
-    "Artifact Overview — Endpoint type badges: HTTP, JMS, Timer (cleaned Quartz names), ProcessDirect, generic Adapter.",
-    "Artifact Overview — \"Create Test Case\" directly from an HTTP endpoint, with duplicate detection.",
-    "Data Store — payload viewer: decodes SAP's base64 ZIP format into readable body + headers, with Copy/Download.",
-    "Security Material — bulk delete with type-DELETE-to-confirm safety.",
-    "Packages Compare — new \"Compare Externalized Parameters\" section: pick an IFlow and two registered environments, see every externalized value side by side with a clear match/differs result per parameter.",
-    "Packages Compare — Type filter (Integration Flow, Script Collection, etc.) alongside the existing Match/Differs filter on the main comparison table.",
-    "Dependency Signals — expanded from 3 to 6 object types: added Data Store (overdue alert count), Locked Artifacts, and Credentials (failed deploy state).",
-    "Global Search — expanded from 3 to 8 categories: added Credentials, Data Stores, Packages, Test Cases, and Partner Directory.",
-    "Global Search — \"→ Go to Page\" button on every result section, jumping straight to the right page and tab instead of just showing the match.",
-    "Artifact Overview — \"Show Log Level\" bulk action: select Integration Flows or APIs via the same checkboxes used for Bulk Trace, see each one's actual current log level (INFO/DEBUG/TRACE) and whether trace is active, read directly from SAP's own runtime configuration.",
-    "Compliance Check — a rule is now only counted as a failure if it's applicable, failed, and wasn't skipped; a skipped rule no longer counts as a failure even if marked FAIL."
-  ]}
-];
+        if (status === "approved") {
+          checkMsg.className = "msg success";
+          const orderHtml = data.orderId
+            ? `<div class="order-box">Order ID: ${esc(data.orderId)}</div>`
+            : "";
+          checkMsg.innerHTML = `
+            <div style="font-weight:700; margin-bottom:4px;">✅ Approved! Your license key:</div>
+            <div class="key-box">${esc(data.licenseKey || "")}</div>
+            ${orderHtml}
+            <div class="warning-box">
+              ⚠️ Save your key and Order ID somewhere safe — you'll need the key if you reinstall the extension,
+              and the Order ID lets you recover it later if you lose it.
+            </div>
+          `;
+        } else if (status === "pending") {
+          checkMsg.className = "msg pending";
+          checkMsg.textContent = "⏳ Still under review. Please check back in a little while.";
+        } else if (status === "rejected") {
+          checkMsg.className = "msg error";
+          checkMsg.textContent = "❌ " + (data?.message || "This payment could not be verified.");
+        } else {
+          checkMsg.className = "msg error";
+          checkMsg.textContent = "No request found for that transaction ID.";
+        }
+      } catch (err) {
+        checkMsg.className = "msg error";
+        checkMsg.textContent = "❌ Network error — please try again.";
+      } finally {
+        checkBtn.disabled = false;
+        checkBtn.textContent = "Check Status";
+      }
+    });
 
-const grid = document.getElementById('featureGrid');
-let openIndex = null;
-let groupSeen = new Set();
+    // Enter key on both inputs
+    txnInput.addEventListener("keydown",      (e) => e.key === "Enter" && submitBtn.click());
+    checkTxnInput.addEventListener("keydown", (e) => e.key === "Enter" && checkBtn.click());
 
-FEATURES.forEach((f, i) => {
-  if (!groupSeen.has(f.group)) {
-    groupSeen.add(f.group);
-    const label = document.createElement('div');
-    label.className = 'group-label';
-    label.textContent = f.group;
-    grid.appendChild(label);
-  }
+    function validateTxn(txn) {
+      if (!txn) return "Please enter the transaction ID.";
+      if (txn.length < 8) return "Transaction ID too short — minimum 8 characters.";
+      if (txn.length > 35) return "Transaction ID too long — maximum 35 characters (NPCI limit).";
+      if (!/^[a-zA-Z0-9]+$/.test(txn)) return "Transaction ID should only contain letters and numbers.";
+      return null; // valid
+    }
 
-  const card = document.createElement('button');
-  card.className = 'feat';
-  card.setAttribute('data-index', i);
-  card.innerHTML =
-    '<div class="feat-top"><div class="feat-icon">' + f.icon + '</div><div class="feat-chevron">▾</div></div>' +
-    '<h3>' + f.title + '</h3>' +
-    '<p class="tag">' + f.tag + '</p>';
-
-  const detail = document.createElement('div');
-  detail.className = 'feat-detail';
-  detail.setAttribute('data-index', i);
-  detail.innerHTML =
-    '<h4>// ' + f.title + '</h4>' +
-    '<ul>' + f.points.map(p => '<li>' + p + '</li>').join('') + '</ul>' +
-    '<div class="close-row"><button class="close-btn">Close ✕</button></div>';
-
-  card.addEventListener('click', () => toggle(i));
-  detail.querySelector('.close-btn').addEventListener('click', () => toggle(i));
-
-  grid.appendChild(card);
-  grid.appendChild(detail);
-});
-
-function toggle(i) {
-  const cards = grid.querySelectorAll('.feat');
-  const details = grid.querySelectorAll('.feat-detail');
-
-  if (openIndex === i) {
-    cards[i].classList.remove('is-open');
-    details[i].classList.remove('is-visible');
-    openIndex = null;
-    return;
-  }
-
-  cards.forEach(c => c.classList.remove('is-open'));
-  details.forEach(d => d.classList.remove('is-visible'));
-
-  cards[i].classList.add('is-open');
-  details[i].classList.add('is-visible');
-  openIndex = i;
-
-  details[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-</script>
-
+    function esc(s) {
+      return String(s || "")
+        .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+  </script>
 </body>
 </html>
